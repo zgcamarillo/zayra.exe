@@ -160,7 +160,7 @@ function Money() {
               </p>
 
               <h3>
-                Where's the money going? ♡
+                Where did all my money go? ♡
               </h3>
             </div>
 
@@ -298,13 +298,11 @@ function Money() {
           </p>
 
           <h3>
-            Every dollar has a job ♡
+            Girl, Check Your Bank Account ♡
           </h3>
 
           <p>
-            Keep adding your income and
-            expenses so ZAYRA.EXE can help
-            you see the bigger picture.
+            Keep adding your income and expenses so ZAYRA.EXE can investigate the financial crime scene.
           </p>
 
           <div className="money-mini-stats">

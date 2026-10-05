@@ -281,7 +281,7 @@ function Trackers() {
 
                     <div className="progress">
                       <div
-                        className="progress-fill career"
+                        className="progress-fill tracker-fill"
                         style={{
                           width: `${percentage}%`,
                         }}

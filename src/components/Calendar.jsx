@@ -1,96 +1,184 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const getDateKey = (date) => {
+  return `${date.getFullYear()}-${String(
+    date.getMonth() + 1
+  ).padStart(2, "0")}-${String(
+    date.getDate()
+  ).padStart(2, "0")}`;
+};
+
+const formatTime = (time) => {
+  if (!time) {
+    return "";
+  }
+
+  const [hours, minutes] = time.split(":");
+  const date = new Date();
+
+  date.setHours(Number(hours));
+  date.setMinutes(Number(minutes));
+
+  return date.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
 
 function Calendar() {
   const today = new Date();
 
-  const [currentDate, setCurrentDate] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1)
-  );
+  const [currentMonth, setCurrentMonth] =
+    useState(new Date());
 
-  const [selectedDate, setSelectedDate] = useState(today);
-
-  const [showEventForm, setShowEventForm] = useState(false);
-
-  const [eventName, setEventName] = useState("");
-
-  const [editingEventId, setEditingEventId] = useState(null);
+  const [selectedDate, setSelectedDate] =
+    useState(today);
 
   const [events, setEvents] = useState(() => {
-    const savedEvents = localStorage.getItem("zayra-events");
+    const savedEvents =
+      localStorage.getItem("zayra-events");
 
-    return savedEvents ? JSON.parse(savedEvents) : {};
+    return savedEvents
+      ? JSON.parse(savedEvents)
+      : {};
   });
 
-  const month = currentDate.getMonth();
-  const year = currentDate.getFullYear();
+  const [showEventForm, setShowEventForm] =
+    useState(false);
 
-  const monthName = currentDate.toLocaleString("default", {
-    month: "long",
-  });
+  const [eventName, setEventName] =
+    useState("");
 
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const [eventTime, setEventTime] =
+    useState("");
 
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const [editingEvent, setEditingEvent] =
+    useState(null);
 
-  const getDateKey = (date) => {
-    return `${date.getFullYear()}-${String(
-      date.getMonth() + 1
-    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  useEffect(() => {
+    localStorage.setItem(
+      "zayra-events",
+      JSON.stringify(events)
+    );
+  }, [events]);
+
+  const year =
+    currentMonth.getFullYear();
+
+  const month =
+    currentMonth.getMonth();
+
+  const monthName =
+    currentMonth.toLocaleDateString(
+      "en-US",
+      {
+        month: "long",
+        year: "numeric",
+      }
+    );
+
+  const firstDay =
+    new Date(year, month, 1).getDay();
+
+  const daysInMonth =
+    new Date(year, month + 1, 0).getDate();
+
+  const calendarDays = [];
+
+  for (let i = 0; i < firstDay; i++) {
+    calendarDays.push(null);
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    calendarDays.push(
+      new Date(year, month, day)
+    );
+  }
+
+  const selectedDateKey =
+    getDateKey(selectedDate);
+
+  const selectedEvents =
+    events[selectedDateKey] || [];
+
+  const goToPreviousMonth = () => {
+    setCurrentMonth(
+      new Date(year, month - 1, 1)
+    );
   };
 
-  const previousMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
-
-  const nextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
+  const goToNextMonth = () => {
+    setCurrentMonth(
+      new Date(year, month + 1, 1)
+    );
   };
 
   const goToToday = () => {
-    setCurrentDate(
-      new Date(today.getFullYear(), today.getMonth(), 1)
+    const now = new Date();
+
+    setCurrentMonth(
+      new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1
+      )
     );
 
-    setSelectedDate(today);
+    setSelectedDate(now);
   };
 
-  const isToday = (day) => {
+  const isToday = (date) => {
+    if (!date) {
+      return false;
+    }
+
     return (
-      day === today.getDate() &&
-      month === today.getMonth() &&
-      year === today.getFullYear()
+      getDateKey(date) ===
+      getDateKey(today)
     );
   };
 
-  const isSelected = (day) => {
+  const hasEvents = (date) => {
+    if (!date) {
+      return false;
+    }
+
+    const dateKey =
+      getDateKey(date);
+
     return (
-      selectedDate &&
-      day === selectedDate.getDate() &&
-      month === selectedDate.getMonth() &&
-      year === selectedDate.getFullYear()
+      events[dateKey] &&
+      events[dateKey].length > 0
     );
   };
 
-  const handleDateClick = (day) => {
-    setSelectedDate(new Date(year, month, day));
+  const handleDateClick = (date) => {
+    if (!date) {
+      return;
+    }
+
+    setSelectedDate(date);
   };
 
-  const openEventForm = () => {
+  const openAddEvent = () => {
+    setEditingEvent(null);
     setEventName("");
-    setEditingEventId(null);
+    setEventTime("");
     setShowEventForm(true);
   };
 
-  const openEditForm = (eventToEdit) => {
-    setEventName(eventToEdit.name);
-    setEditingEventId(eventToEdit.id);
+  const openEditEvent = (event) => {
+    setEditingEvent(event);
+    setEventName(event.name);
+    setEventTime(event.time || "");
     setShowEventForm(true);
   };
 
   const closeEventForm = () => {
-    setEventName("");
-    setEditingEventId(null);
     setShowEventForm(false);
+    setEditingEvent(null);
+    setEventName("");
+    setEventTime("");
   };
 
   const handleSaveEvent = (event) => {
@@ -100,215 +188,322 @@ function Calendar() {
       return;
     }
 
-    const dateKey = getDateKey(selectedDate);
+    const dateKey =
+      getDateKey(selectedDate);
 
-    let updatedEvents;
+    const currentEvents =
+      events[dateKey] || [];
 
-    if (editingEventId !== null) {
-      updatedEvents = {
+    if (editingEvent) {
+      const updatedEvents =
+        currentEvents.map(
+          (item) =>
+            item.id === editingEvent.id
+              ? {
+                  ...item,
+                  name: eventName.trim(),
+                  time: eventTime,
+                }
+              : item
+        );
+
+      setEvents({
         ...events,
-        [dateKey]: (events[dateKey] || []).map((eventItem) =>
-          eventItem.id === editingEventId
-            ? {
-                ...eventItem,
-                name: eventName.trim(),
-              }
-            : eventItem
-        ),
-      };
+        [dateKey]: updatedEvents,
+      });
     } else {
       const newEvent = {
         id: Date.now(),
         name: eventName.trim(),
+        time: eventTime,
       };
 
-      updatedEvents = {
+      setEvents({
         ...events,
         [dateKey]: [
-          ...(events[dateKey] || []),
+          ...currentEvents,
           newEvent,
         ],
-      };
+      });
     }
-
-    setEvents(updatedEvents);
-
-    localStorage.setItem(
-      "zayra-events",
-      JSON.stringify(updatedEvents)
-    );
 
     closeEventForm();
   };
 
   const handleDeleteEvent = (eventId) => {
-    const dateKey = getDateKey(selectedDate);
+    const dateKey =
+      getDateKey(selectedDate);
 
-    const updatedDayEvents = (
-      events[dateKey] || []
-    ).filter((event) => event.id !== eventId);
+    const updatedEvents =
+      (events[dateKey] || []).filter(
+        (event) =>
+          event.id !== eventId
+      );
 
-    const updatedEvents = {
+    const newEvents = {
       ...events,
     };
 
-    if (updatedDayEvents.length === 0) {
-      delete updatedEvents[dateKey];
+    if (updatedEvents.length === 0) {
+      delete newEvents[dateKey];
     } else {
-      updatedEvents[dateKey] = updatedDayEvents;
+      newEvents[dateKey] =
+        updatedEvents;
     }
 
-    setEvents(updatedEvents);
+    setEvents(newEvents);
 
-    localStorage.setItem(
-      "zayra-events",
-      JSON.stringify(updatedEvents)
-    );
+    if (
+      editingEvent &&
+      editingEvent.id === eventId
+    ) {
+      closeEventForm();
+    }
   };
 
-  const selectedDateKey = getDateKey(selectedDate);
+  const sortedSelectedEvents =
+    [...selectedEvents].sort(
+      (a, b) => {
+        if (!a.time && !b.time) {
+          return 0;
+        }
 
-  const selectedEvents = events[selectedDateKey] || [];
+        if (!a.time) {
+          return 1;
+        }
 
-  const selectedDateText = selectedDate.toLocaleDateString(
-    "default",
-    {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
+        if (!b.time) {
+          return -1;
+        }
+
+        return a.time.localeCompare(
+          b.time
+        );
+      }
+    );
 
   return (
     <section className="calendar-page">
+
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
+
       <div className="calendar-header">
+
         <div>
           <p className="eyebrow">
-            ♡ YOUR SCHEDULE
+            ♡ PLAN YOUR DAYS
           </p>
 
           <h2>
-            {monthName} {year}
+            My Calendar
           </h2>
 
           <p className="calendar-subtitle">
-            cute calendar, serious business
+            who scheduled all this?
+
           </p>
         </div>
 
-        <div className="calendar-controls">
-          <button
-            className="calendar-control"
-            onClick={previousMonth}
-          >
-            ←
-          </button>
+        <button
+          className="primary-button"
+          onClick={openAddEvent}
+        >
+          + Add Event
+        </button>
 
-          <button
-            className="today-button"
-            onClick={goToToday}
-          >
-            Today
-          </button>
-
-          <button
-            className="calendar-control"
-            onClick={nextMonth}
-          >
-            →
-          </button>
-        </div>
       </div>
 
+
+      {/* =====================================================
+          CALENDAR CARD
+          ===================================================== */}
+
       <div className="calendar-layout">
-        <div className="dashboard-card full-calendar">
-          <div className="calendar-weekdays">
-            <span>Sun</span>
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
+
+        <div className="dashboard-card calendar-main">
+
+          <div className="calendar-controls">
+
+            <button
+              className="calendar-nav-button"
+              onClick={
+                goToPreviousMonth
+              }
+              aria-label="Previous month"
+            >
+              ‹
+            </button>
+
+            <div className="calendar-month-title">
+              <h3>
+                {monthName}
+              </h3>
+
+              <button
+                className="calendar-today-button"
+                onClick={goToToday}
+              >
+                Today
+              </button>
+            </div>
+
+            <button
+              className="calendar-nav-button"
+              onClick={
+                goToNextMonth
+              }
+              aria-label="Next month"
+            >
+              ›
+            </button>
+
           </div>
 
+
+          {/* =================================================
+              WEEKDAYS
+              ================================================= */}
+
+          <div className="calendar-weekdays">
+
+            {[
+              "SUN",
+              "MON",
+              "TUE",
+              "WED",
+              "THU",
+              "FRI",
+              "SAT",
+            ].map((day) => (
+              <span key={day}>
+                {day}
+              </span>
+            ))}
+
+          </div>
+
+
+          {/* =================================================
+              DAYS
+              ================================================= */}
+
           <div className="calendar-grid">
-            {Array.from(
-              { length: firstDayOfMonth },
-              (_, index) => (
-                <div
-                  className="calendar-empty"
-                  key={`empty-${index}`}
-                />
-              )
-            )}
 
-            {Array.from(
-              { length: daysInMonth },
-              (_, index) => {
-                const day = index + 1;
+            {calendarDays.map(
+              (date, index) => {
 
-                const dateForDay = new Date(
-                  year,
-                  month,
-                  day
-                );
+                if (!date) {
+                  return (
+                    <div
+                      className="calendar-empty"
+                      key={`empty-${index}`}
+                    />
+                  );
+                }
 
                 const dateKey =
-                  getDateKey(dateForDay);
+                  getDateKey(date);
 
-                const dayEvents =
-                  events[dateKey] || [];
+                const isSelected =
+                  dateKey ===
+                  selectedDateKey;
 
                 return (
                   <button
-                    key={day}
+                    key={dateKey}
                     className={`calendar-date ${
-                      isToday(day) ? "today" : ""
+                      isToday(date)
+                        ? "today"
+                        : ""
                     } ${
-                      isSelected(day) ? "selected" : ""
+                      isSelected
+                        ? "selected"
+                        : ""
+                    } ${
+                      hasEvents(date)
+                        ? "has-event"
+                        : ""
                     }`}
                     onClick={() =>
-                      handleDateClick(day)
+                      handleDateClick(
+                        date
+                      )
                     }
                   >
-                    <span className="date-number">
-                      {day}
+
+                    <span>
+                      {date.getDate()}
                     </span>
 
-                    {isToday(day) && (
-                      <span className="today-label">
-                        today
-                      </span>
+                    {hasEvents(
+                      date
+                    ) && (
+                      <span className="event-dot" />
                     )}
 
-                    {dayEvents.length > 0 && (
-                      <span className="event-dot">
-                        {dayEvents.length === 1
-                          ? "♡"
-                          : `${dayEvents.length} ♡`}
-                      </span>
-                    )}
                   </button>
                 );
               }
             )}
+
           </div>
+
         </div>
 
-        <aside className="calendar-details dashboard-card">
-          <p className="card-label">
-            SELECTED DATE
-          </p>
 
-          <h3>
-            {selectedDateText}
-          </h3>
+        {/* =====================================================
+            SELECTED DATE / EVENTS
+            ===================================================== */}
 
-          {selectedEvents.length === 0 ? (
-            <div className="event-placeholder">
-              <span className="event-icon">
+        <aside className="dashboard-card calendar-events-card">
+
+          <div className="calendar-events-header">
+
+            <div>
+
+              <p className="card-label">
+                YOUR DAY
+              </p>
+
+              <h3>
+                {selectedDate.toLocaleDateString(
+                  "en-US",
+                  {
+                    weekday:
+                      "long",
+                    month:
+                      "long",
+                    day: "numeric",
+                  }
+                )}
+              </h3>
+
+            </div>
+
+            <button
+              className="calendar-add-small"
+              onClick={
+                openAddEvent
+              }
+              aria-label="Add event"
+            >
+              +
+            </button>
+
+          </div>
+
+
+          {/* =================================================
+              EVENTS
+              ================================================= */}
+
+          {sortedSelectedEvents.length ===
+          0 ? (
+            <div className="calendar-no-events">
+
+              <span className="calendar-empty-heart">
                 ♡
               </span>
 
@@ -317,125 +512,214 @@ function Calendar() {
               </p>
 
               <small>
-                Add something to your day ✨
+                Pretty sure I had plans
               </small>
+
+              <button
+                className="home-card-button"
+                onClick={
+                  openAddEvent
+                }
+              >
+                + Add something
+              </button>
+
             </div>
           ) : (
-            <div className="events-list">
-              {selectedEvents.map((event) => (
-                <div
-                  className="calendar-event"
-                  key={event.id}
-                >
-                  <div className="calendar-event-info">
-                    <span className="event-bullet">
-                      ♡
-                    </span>
+            <div className="calendar-event-list">
 
-                    <span>
-                      {event.name}
-                    </span>
+              {sortedSelectedEvents.map(
+                (event) => (
+                  <div
+                    className="calendar-event"
+                    key={event.id}
+                  >
+
+                    <div className="calendar-event-time">
+
+                      <span>
+                        {event.time
+                          ? formatTime(
+                              event.time
+                            )
+                          : "Anytime"}
+                      </span>
+
+                    </div>
+
+                    <div className="calendar-event-info">
+
+                      <strong>
+                        {event.name}
+                      </strong>
+
+                    </div>
+
+                    <div className="calendar-event-actions">
+
+                      <button
+                        onClick={() =>
+                          openEditEvent(
+                            event
+                          )
+                        }
+                        aria-label={`Edit ${event.name}`}
+                      >
+                        ✎
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleDeleteEvent(
+                            event.id
+                          )
+                        }
+                        aria-label={`Delete ${event.name}`}
+                      >
+                        ×
+                      </button>
+
+                    </div>
+
                   </div>
+                )
+              )}
 
-                  <div className="event-actions">
-                    <button
-                      className="edit-event"
-                      onClick={() =>
-                        openEditForm(event)
-                      }
-                      aria-label={`Edit ${event.name}`}
-                    >
-                      ✎
-                    </button>
-
-                    <button
-                      className="delete-event"
-                      onClick={() =>
-                        handleDeleteEvent(event.id)
-                      }
-                      aria-label={`Delete ${event.name}`}
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))}
             </div>
           )}
 
-          <button
-            className="add-calendar-event"
-            onClick={openEventForm}
-          >
-            + Add event
-          </button>
         </aside>
+
       </div>
 
+
+      {/* =====================================================
+          ADD / EDIT EVENT MODAL
+          ===================================================== */}
+
       {showEventForm && (
-        <div className="event-overlay">
-          <div className="event-modal">
-            <button
-              className="close-event"
-              onClick={closeEventForm}
+        <div
+          className="calendar-modal-overlay"
+          onClick={
+            closeEventForm
+          }
+        >
+
+          <div
+            className="calendar-modal"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div className="calendar-modal-header">
+
+              <div>
+
+                <p className="card-label">
+                  {editingEvent
+                    ? "EDIT EVENT"
+                    : "NEW EVENT"}
+                </p>
+
+                <h3>
+                  {editingEvent
+                    ? "Update your plans ♡"
+                    : "What's happening?"}
+                </h3>
+
+              </div>
+
+              <button
+                className="calendar-modal-close"
+                onClick={
+                  closeEventForm
+                }
+                aria-label="Close"
+              >
+                ×
+              </button>
+
+            </div>
+
+
+            <form
+              className="calendar-event-form"
+              onSubmit={
+                handleSaveEvent
+              }
             >
-              ×
-            </button>
 
-            <p className="eyebrow">
-              {editingEventId !== null
-                ? "♡ EDIT EVENT"
-                : "♡ NEW EVENT"}
-            </p>
+              <label>
+                <span>
+                  EVENT
+                </span>
 
-            <h2>
-              {editingEventId !== null
-                ? "Make a little change ✨"
-                : "Add something cute ✨"}
-            </h2>
-
-            <p className="event-date">
-              {selectedDateText}
-            </p>
-
-            <form onSubmit={handleSaveEvent}>
-              <label htmlFor="event-name">
-                Event name
+                <input
+                  type="text"
+                  value={eventName}
+                  onChange={(event) =>
+                    setEventName(
+                      event.target.value
+                    )
+                  }
+                  placeholder="e.g. Dentist appointment"
+                  autoFocus
+                />
               </label>
 
-              <input
-                id="event-name"
-                type="text"
-                placeholder="e.g. Finish portfolio..."
-                value={eventName}
-                onChange={(event) =>
-                  setEventName(event.target.value)
-                }
-                autoFocus
-              />
 
-              <div className="event-form-buttons">
+              <label>
+                <span>
+                  TIME
+                </span>
+
+                <input
+                  type="time"
+                  value={eventTime}
+                  onChange={(event) =>
+                    setEventTime(
+                      event.target.value
+                    )
+                  }
+                />
+
+                <small>
+                  Leave blank if it can happen anytime.
+                </small>
+              </label>
+
+
+              <div className="calendar-form-actions">
+
                 <button
                   type="button"
-                  className="cancel-event"
-                  onClick={closeEventForm}
+                  className="calendar-cancel-button"
+                  onClick={
+                    closeEventForm
+                  }
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="save-event"
+                  className="primary-button"
                 >
-                  {editingEventId !== null
-                    ? "Save Changes ✨"
-                    : "Add Event ✨"}
+                  {editingEvent
+                    ? "Save Changes"
+                    : "Add Event"}
                 </button>
+
               </div>
+
             </form>
+
           </div>
+
         </div>
       )}
+
     </section>
   );
 }

@@ -309,7 +309,7 @@ function Tasks({ tasks, setTasks }) {
           </p>
 
           <h3>
-            You're doing great ♡
+            You're doing great sweetie! ♡
           </h3>
 
           <div className="task-progress">
