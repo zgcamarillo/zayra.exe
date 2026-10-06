@@ -52,6 +52,9 @@ function Calendar() {
   const [eventTime, setEventTime] =
     useState("");
 
+  const [eventPriority, setEventPriority] =
+    useState("normal");
+
   const [editingEvent, setEditingEvent] =
     useState(null);
 
@@ -89,7 +92,11 @@ function Calendar() {
     calendarDays.push(null);
   }
 
-  for (let day = 1; day <= daysInMonth; day++) {
+  for (
+    let day = 1;
+    day <= daysInMonth;
+    day++
+  ) {
     calendarDays.push(
       new Date(year, month, day)
     );
@@ -164,6 +171,7 @@ function Calendar() {
     setEditingEvent(null);
     setEventName("");
     setEventTime("");
+    setEventPriority("normal");
     setShowEventForm(true);
   };
 
@@ -171,6 +179,7 @@ function Calendar() {
     setEditingEvent(event);
     setEventName(event.name);
     setEventTime(event.time || "");
+    setEventPriority(event.priority || "normal");
     setShowEventForm(true);
   };
 
@@ -179,6 +188,7 @@ function Calendar() {
     setEditingEvent(null);
     setEventName("");
     setEventTime("");
+    setEventPriority("normal");
   };
 
   const handleSaveEvent = (event) => {
@@ -203,6 +213,7 @@ function Calendar() {
                   ...item,
                   name: eventName.trim(),
                   time: eventTime,
+                  priority: eventPriority,
                 }
               : item
         );
@@ -216,6 +227,7 @@ function Calendar() {
         id: Date.now(),
         name: eventName.trim(),
         time: eventTime,
+        priority: eventPriority,
       };
 
       setEvents({
@@ -302,7 +314,6 @@ function Calendar() {
 
           <p className="calendar-subtitle">
             who scheduled all this?
-
           </p>
         </div>
 
@@ -337,6 +348,7 @@ function Calendar() {
             </button>
 
             <div className="calendar-month-title">
+
               <h3>
                 {monthName}
               </h3>
@@ -347,6 +359,7 @@ function Calendar() {
               >
                 Today
               </button>
+
             </div>
 
             <button
@@ -531,7 +544,7 @@ function Calendar() {
               {sortedSelectedEvents.map(
                 (event) => (
                   <div
-                    className="calendar-event"
+                    className={`calendar-event priority-${event.priority || "normal"}`}
                     key={event.id}
                   >
 
@@ -552,6 +565,16 @@ function Calendar() {
                       <strong>
                         {event.name}
                       </strong>
+
+                      <span className="calendar-event-priority">
+                        {event.priority ===
+                        "important"
+                          ? "🔴 Important"
+                          : event.priority ===
+                            "reminder"
+                          ? "🟡 Reminder"
+                          : "⚪ Normal"}
+                      </span>
 
                     </div>
 
@@ -650,6 +673,8 @@ function Calendar() {
               }
             >
 
+              {/* EVENT */}
+
               <label>
                 <span>
                   EVENT
@@ -668,6 +693,8 @@ function Calendar() {
                 />
               </label>
 
+
+              {/* TIME */}
 
               <label>
                 <span>
@@ -689,6 +716,104 @@ function Calendar() {
                 </small>
               </label>
 
+
+              {/* PRIORITY */}
+
+              <div className="calendar-priority-field">
+
+                <span className="calendar-form-label">
+                  PRIORITY
+                </span>
+
+                <div className="calendar-priority-options">
+
+                  <label className="priority-option">
+
+                    <input
+                      type="radio"
+                      name="eventPriority"
+                      value="normal"
+                      checked={
+                        eventPriority ===
+                        "normal"
+                      }
+                      onChange={(event) =>
+                        setEventPriority(
+                          event.target.value
+                        )
+                      }
+                    />
+
+                    <span className="priority-dot normal"></span>
+
+                    <span>
+                      Normal
+                    </span>
+
+                  </label>
+
+
+                  <label className="priority-option">
+
+                    <input
+                      type="radio"
+                      name="eventPriority"
+                      value="reminder"
+                      checked={
+                        eventPriority ===
+                        "reminder"
+                      }
+                      onChange={(event) =>
+                        setEventPriority(
+                          event.target.value
+                        )
+                      }
+                    />
+
+                    <span className="priority-dot reminder"></span>
+
+                    <span>
+                      Reminder
+                    </span>
+
+                  </label>
+
+
+                  <label className="priority-option">
+
+                    <input
+                      type="radio"
+                      name="eventPriority"
+                      value="important"
+                      checked={
+                        eventPriority ===
+                        "important"
+                      }
+                      onChange={(event) =>
+                        setEventPriority(
+                          event.target.value
+                        )
+                      }
+                    />
+
+                    <span className="priority-dot important"></span>
+
+                    <span>
+                      Important
+                    </span>
+
+                  </label>
+
+                </div>
+
+                <small>
+                  Important events will be highlighted by ZAYRA AI.
+                </small>
+
+              </div>
+
+
+              {/* FORM ACTIONS */}
 
               <div className="calendar-form-actions">
 

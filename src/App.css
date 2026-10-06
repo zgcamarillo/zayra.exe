@@ -4315,3 +4315,155 @@ select:focus {
     width: 100%;
   }
 }
+/* =========================================================
+   CALENDAR — EVENT PRIORITY
+   ========================================================= */
+
+.calendar-priority-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calendar-form-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--cream-soft);
+}
+
+.calendar-priority-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.priority-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(245, 235, 221, 0.035);
+  color: var(--cream-soft);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.priority-option:hover {
+  border-color: var(--border-light);
+  background: rgba(245, 235, 221, 0.07);
+  transform: translateY(-1px);
+}
+
+.priority-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.priority-option:has(input:checked) {
+  border-color: var(--cherry-soft);
+  background: rgba(143, 35, 57, 0.18);
+  color: var(--cream);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.priority-dot {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.priority-dot.normal {
+  background: #d8cec4;
+  box-shadow: 0 0 0 3px rgba(216, 206, 196, 0.08);
+}
+
+.priority-dot.reminder {
+  background: #d9a441;
+  box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.08);
+}
+
+.priority-dot.important {
+  background: var(--cherry-bright);
+  box-shadow: 0 0 0 3px rgba(169, 45, 71, 0.12);
+}
+
+.calendar-priority-field small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   CALENDAR — EVENT PRIORITY DISPLAY
+   ========================================================= */
+
+.calendar-event {
+  position: relative;
+}
+
+.calendar-event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.calendar-event-priority {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* Important events */
+
+.calendar-event.priority-important {
+  border-left: 3px solid var(--cherry-bright);
+}
+
+.calendar-event.priority-important
+  .calendar-event-priority {
+  color: var(--cherry-soft);
+}
+
+/* Reminder events */
+
+.calendar-event.priority-reminder {
+  border-left: 3px solid #d9a441;
+}
+
+.calendar-event.priority-reminder
+  .calendar-event-priority {
+  color: #d9a441;
+}
+
+/* Normal events */
+
+.calendar-event.priority-normal {
+  border-left: 3px solid rgba(245, 235, 221, 0.25);
+}
+
+
+/* =========================================================
+   CALENDAR — PRIORITY RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .calendar-priority-options {
+    flex-direction: column;
+  }
+
+  .priority-option {
+    width: 100%;
+  }
+}
