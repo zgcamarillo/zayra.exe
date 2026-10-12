@@ -1104,47 +1104,47 @@ function App() {
     </span>
   </div>
 
-  {weatherLoading ? (
-    <div className="home-empty-state">
-      Checking the forecast...
-    </div>
-  ) : weather ? (
-    <>
-      <p className="weather-city">
-        {weather.city}
-        {weather.state ? `, ${weather.state}` : ""}
-      </p>
-
-      <div className="weather-main">
-        <span className="weather-temp">
-          {weather.tomorrow.high}°
-        </span>
-
-        <div className="weather-details">
-          <strong>{weather.tomorrow.condition}</strong>
-          <span>
-            {weather.tomorrow.low}° low
-          </span>
-        </div>
+    {weatherLoading ? (
+      <div className="home-empty-state">
+        Checking the forecast...
       </div>
+    ) : weather ? (
+      <>
+        <p className="weather-city">
+          {weather.city}
+          {weather.state ? `, ${weather.state}` : ""}
+        </p>
 
-      <p className="weather-note">
-        Tomorrow's forecast ♡
-      </p>
-    </>
-  ) : (
-    <div className="home-empty-state">
-      Set your city in Settings to see the forecast.
-    </div>
-  )}
+        <div className="weather-main">
+          <span className="weather-temp">
+            {weather.tomorrow.high}°
+          </span>
 
-  <button
-    className="home-card-button"
-    onClick={() => setActivePage("settings")}
-  >
-    Weather settings →
-  </button>
-</section>
+          <div className="weather-details">
+            <strong>{weather.tomorrow.condition}</strong>
+            <span>
+              {weather.tomorrow.low}° low
+            </span>
+          </div>
+        </div>
+
+        <p className="weather-note">
+          Tomorrow's forecast ♡
+        </p>
+      </>
+    ) : (
+      <div className="home-empty-state">
+        Set your city in Settings to see the forecast.
+      </div>
+    )}
+
+    <button
+      className="home-card-button"
+      onClick={() => setActivePage("settings")}
+    >
+      Weather settings →
+    </button>
+  </section>
                 {/* ==================================
                     TODAY
                 ================================== */}
