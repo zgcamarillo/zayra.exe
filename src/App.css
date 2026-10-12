@@ -4467,3 +4467,203 @@ select:focus {
     width: 100%;
   }
 }
+/* ========================================
+   ZAYRA AI BRIEFING
+======================================== */
+
+.zayra-briefing {
+  margin-bottom: 28px;
+  padding: 26px;
+  border: 1px solid rgba(200, 91, 112, 0.28);
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(95, 23, 40, 0.96),
+      rgba(27, 17, 18, 0.98)
+    );
+  box-shadow: 0 18px 40px rgba(16, 9, 10, 0.18);
+}
+
+.briefing-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.briefing-header h2 {
+  margin: 4px 0 6px;
+  font-size: 28px;
+}
+
+.briefing-intro {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.briefing-speak {
+  border: 1px solid rgba(245, 235, 221, 0.2);
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: rgba(245, 235, 221, 0.08);
+  color: var(--cream);
+  cursor: pointer;
+  font-family: inherit;
+  transition: 0.2s ease;
+}
+
+.briefing-speak:hover {
+  transform: translateY(-2px);
+  background: rgba(245, 235, 221, 0.14);
+}
+
+.briefing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.briefing-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(245, 235, 221, 0.1);
+  border-radius: 18px;
+  background: rgba(16, 9, 10, 0.35);
+}
+
+.briefing-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(200, 91, 112, 0.12);
+  font-size: 20px;
+}
+
+.briefing-card h3 {
+  margin: 3px 0 6px;
+  font-size: 17px;
+}
+
+.briefing-card p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.briefing-note {
+  background: rgba(200, 91, 112, 0.08);
+}
+
+@media (max-width: 700px) {
+
+  .briefing-header {
+    flex-direction: column;
+  }
+
+  .briefing-speak {
+    width: 100%;
+  }
+
+  .briefing-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+.weather-location-form {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.weather-location-input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 1px solid rgba(200, 91, 112, 0.25);
+  border-radius: 12px;
+  outline: none;
+  background: rgba(16, 9, 10, 0.55);
+  color: var(--cream);
+  font-family: inherit;
+}
+
+.weather-location-input::placeholder {
+  color: var(--muted);
+}
+
+.weather-location-input:focus {
+  border-color: var(--cherry-soft);
+}
+
+.weather-location-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.weather-location-status strong {
+  color: var(--cream);
+}
+
+@media (max-width: 600px) {
+  .weather-location-form {
+    flex-direction: column;
+  }
+}
+.weather-card {
+  min-height: 220px;
+}
+
+.weather-city {
+  margin: 6px 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.weather-temp {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--cream);
+}
+
+.weather-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weather-details strong {
+  color: var(--cream);
+  font-size: 14px;
+}
+
+.weather-details span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.weather-note {
+  margin: 14px 0 16px;
+  color: var(--muted);
+  font-size: 12px;
+}

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getWeather } from "./services/weather";
+
 import "./App.css";
 
 import Calendar from "./components/Calendar";
@@ -7,6 +9,7 @@ import Money from "./components/Money";
 import Goals from "./components/Goals";
 import Trackers from "./components/Trackers";
 import Notes from "./components/Notes";
+import ZayraBriefing from "./components/ZayraBriefing";
 
 function App() {
   // ========================================
@@ -15,6 +18,24 @@ function App() {
 
   const [activePage, setActivePage] =
     useState("home");
+
+  const [weatherCity, setWeatherCity] =
+    useState(() => {
+      return (
+        localStorage.getItem(
+          "zayra-weather-city"
+        ) || ""
+      );
+    });
+
+  const [weather, setWeather] =
+    useState(null);
+
+  const [weatherLoading, setWeatherLoading] =
+    useState(false);
+
+  const [weatherError, setWeatherError] =
+    useState("");
 
   const [resetMessage, setResetMessage] =
     useState("");
@@ -34,6 +55,67 @@ function App() {
   });
 
   // ========================================
+  // WEATHER
+  // ========================================
+
+  const loadWeather = async (city) => {
+    if (!city?.trim()) return;
+
+    setWeatherLoading(true);
+    setWeatherError("");
+
+    try {
+      const weatherData =
+        await getWeather(city.trim());
+
+      setWeather(weatherData);
+
+      localStorage.setItem(
+        "zayra-weather-city",
+        city.trim()
+      );
+    } catch (error) {
+      console.error(
+        "Weather error:",
+        error
+      );
+
+      setWeatherError(
+        error.message ||
+          "I couldn't get the weather right now."
+      );
+    } finally {
+      setWeatherLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const savedCity =
+      localStorage.getItem(
+        "zayra-weather-city"
+      );
+
+    if (savedCity) {
+      loadWeather(savedCity);
+    }
+  }, []);
+
+  const handleWeatherSubmit = async (
+    event
+  ) => {
+    event.preventDefault();
+
+    if (!weatherCity.trim()) {
+      setWeatherError(
+        "Enter a city first ♡"
+      );
+      return;
+    }
+
+    await loadWeather(weatherCity);
+  };
+
+  // ========================================
   // NAVIGATION
   // ========================================
 
@@ -45,7 +127,10 @@ function App() {
   // SAVED DATA
   // ========================================
 
-  const getSavedData = (key, fallback) => {
+  const getSavedData = (
+    key,
+    fallback
+  ) => {
     try {
       const saved =
         localStorage.getItem(key);
@@ -177,7 +262,9 @@ function App() {
     })
     .slice(0, 4);
 
-  const toggleHomeTask = (taskId) => {
+  const toggleHomeTask = (
+    taskId
+  ) => {
     const updatedTasks =
       tasks.map((task) =>
         task.id === taskId
@@ -325,6 +412,10 @@ function App() {
       "zayra-notes"
     );
 
+    localStorage.removeItem(
+      "zayra-weather-city"
+    );
+
     setResetMessage(
       "All app data has been cleared ♡"
     );
@@ -338,7 +429,6 @@ function App() {
 
   return (
     <div className="life-os">
-
 
       <img
         src="/kiss.png"
@@ -408,7 +498,6 @@ function App() {
 
               <p>
                 no thoughts
-
               </p>
 
             </div>
@@ -635,6 +724,8 @@ function App() {
 
               <div className="settings-grid">
 
+                {/* ABOUT */}
+
                 <div className="dashboard-card settings-card">
 
                   <p className="card-label">
@@ -663,6 +754,8 @@ function App() {
 
                 </div>
 
+                {/* STORAGE */}
+
                 <div className="dashboard-card settings-card">
 
                   <p className="card-label">
@@ -688,6 +781,83 @@ function App() {
                   </div>
 
                 </div>
+
+                {/* WEATHER */}
+
+                <div className="dashboard-card settings-card">
+
+                  <p className="card-label">
+                    WEATHER
+                  </p>
+
+                  <h3>
+                    Where are we today? 🌤️
+                  </h3>
+
+                  <p>
+                    Tell ZAYRA.EXE your city so she can check tomorrow's weather and eventually help with outfit suggestions.
+                  </p>
+
+                  <form
+                    onSubmit={
+                      handleWeatherSubmit
+                    }
+                    className="weather-location-form"
+                  >
+
+                    <input
+                      type="text"
+                      value={
+                        weatherCity
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setWeatherCity(
+                          event.target.value
+                        )
+                      }
+                      placeholder="Charlotte, NC"
+                      className="weather-location-input"
+                    />
+
+                    <button
+                      type="submit"
+                      className="home-card-button"
+                      disabled={
+                        weatherLoading
+                      }
+                    >
+                      {weatherLoading
+                        ? "Checking..."
+                        : "Save Location ♡"}
+                    </button>
+
+                  </form>
+
+                  {weatherError && (
+                    <p className="weather-location-status error">
+                      {weatherError}
+                    </p>
+                  )}
+
+                  {weather &&
+                    !weatherError && (
+                      <p className="weather-location-status">
+                        Weather is set for{" "}
+                        <strong>
+                          {weather.city}
+                          {weather.state
+                            ? `, ${weather.state}`
+                            : ""}
+                        </strong>{" "}
+                        ♡
+                      </p>
+                    )}
+
+                </div>
+
+                {/* DATA */}
 
                 <div className="dashboard-card settings-card">
 
@@ -720,6 +890,8 @@ function App() {
 
                 </div>
 
+                {/* QUOTE */}
+
                 <div className="dashboard-card settings-card settings-quote">
 
                   <span>
@@ -748,7 +920,6 @@ function App() {
           {activePage ===
             "home" && (
             <>
-
               {/* WELCOME */}
 
               <section className="welcome">
@@ -760,7 +931,7 @@ function App() {
                   </p>
 
                   <h2>
-                    Hey Zayra 
+                    Hey Zayra
                   </h2>
 
                   <p className="welcome-text">
@@ -774,6 +945,25 @@ function App() {
                 </div>
 
               </section>
+              {/* ZAYRA BRIEFING */}
+
+              <ZayraBriefing
+                todayEvents={
+                  todayEvents
+                }
+                tasks={tasks}
+                goals={goals}
+                trackers={
+                  trackers
+                }
+                balance={balance}
+                weather={weather}
+                weatherLoading={
+                  weatherLoading
+                }
+              />
+
+
 
               {/* ==================================
                   CALENDAR + TODAY
@@ -897,14 +1087,64 @@ function App() {
                   <button
                     className="home-card-button"
                     onClick={() =>
-                      goTo("calendar")
+                      goTo(
+                        "calendar"
+                      )
                     }
                   >
                     Open Calendar →
                   </button>
 
                 </div>
+<section className="dashboard-card weather-card">
+  <div className="card-heading">
+    <span className="card-label">WEATHER</span>
+    <span className="card-icon">
+      {weather?.tomorrow?.icon || "🌤️"}
+    </span>
+  </div>
 
+  {weatherLoading ? (
+    <div className="home-empty-state">
+      Checking the forecast...
+    </div>
+  ) : weather ? (
+    <>
+      <p className="weather-city">
+        {weather.city}
+        {weather.state ? `, ${weather.state}` : ""}
+      </p>
+
+      <div className="weather-main">
+        <span className="weather-temp">
+          {weather.tomorrow.high}°
+        </span>
+
+        <div className="weather-details">
+          <strong>{weather.tomorrow.condition}</strong>
+          <span>
+            {weather.tomorrow.low}° low
+          </span>
+        </div>
+      </div>
+
+      <p className="weather-note">
+        Tomorrow's forecast ♡
+      </p>
+    </>
+  ) : (
+    <div className="home-empty-state">
+      Set your city in Settings to see the forecast.
+    </div>
+  )}
+
+  <button
+    className="home-card-button"
+    onClick={() => setActivePage("settings")}
+  >
+    Weather settings →
+  </button>
+</section>
                 {/* ==================================
                     TODAY
                 ================================== */}
@@ -937,7 +1177,7 @@ function App() {
                     </span>
 
                   </div>
-
+                          
                   {/* SCHEDULE */}
 
                   <div className="home-today-section">
@@ -1065,11 +1305,11 @@ function App() {
                     <div>
 
                       <strong>
-                        {completedTasks } 
+                        {completedTasks}
                       </strong>
 
                       <span>
-                         done
+                        done
                       </span>
 
                     </div>
@@ -1103,13 +1343,16 @@ function App() {
                   <button
                     className="add-task"
                     onClick={() =>
-                      goTo("tasks")
+                      goTo(
+                        "tasks"
+                      )
                     }
                   >
                     + Manage Tasks
                   </button>
 
                 </div>
+                
 
                 {/* ==================================
                     GOALS
@@ -1201,7 +1444,9 @@ function App() {
                   <button
                     className="home-card-button"
                     onClick={() =>
-                      goTo("goals")
+                      goTo(
+                        "goals"
+                      )
                     }
                   >
                     View Goals →
@@ -1287,7 +1532,9 @@ function App() {
                   <button
                     className="home-card-button"
                     onClick={() =>
-                      goTo("money")
+                      goTo(
+                        "money"
+                      )
                     }
                   >
                     Open Money →
@@ -1486,7 +1733,9 @@ function App() {
                   <button
                     className="home-card-button"
                     onClick={() =>
-                      goTo("notes")
+                      goTo(
+                        "notes"
+                      )
                     }
                   >
                     Open Notes →
